@@ -11,22 +11,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install vcpkg packages
+      - name: Install dependencies
         run: |
-          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
-          C:\vcpkg\bootstrap-vcpkg.bat
-          C:\vcpkg\vcpkg install curl:x64-windows-static nlohmann-json:x64-windows
+          choco install mingw curl -y --no-progress
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp" -OutFile "json.hpp"
 
       - name: Build
-        shell: cmd
+        shell: pwsh
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          set INCLUDE=%INCLUDE%;C:\vcpkg\installed\x64-windows-static\include;C:\vcpkg\installed\x64-windows\include
-          set LIB=%LIB%;C:\vcpkg\installed\x64-windows-static\lib
-          cl /EHsc /O2 /std:c++17 /D CURL_STATICLIB main.cpp /Fe:APEXCRYPT_NUKER_NX13.exe /link libcurl.lib ws2_32.lib wldap32.lib crypt32.lib normaliz.lib advapi32.lib
+          $env:Path = "C:\ProgramData\mingw64\mingw64\bin;C:\ProgramData\chocolatey\bin;" + $env:Path
+          g++ --version
+          g++ -O2 -std=c++17 -I. main.cpp -o APEXCRYPT_NUKER_NX13.exe -lcurl -lws2_32 -lwldap32 -lcrypt32 -lnormaliz
+          if (Test-Path APEXCRYPT_NUKER_NX13.exe) { Get-Item APEXCRYPT_NUKER_NX13.exe } else { Write-Error "Build failed"; exit 1 }
 
-      - name: Upload
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: APEXCRYPT-NUKER-NX13
           path: APEXCRYPT_NUKER_NX13.exe
+          if-no-files-found: error
