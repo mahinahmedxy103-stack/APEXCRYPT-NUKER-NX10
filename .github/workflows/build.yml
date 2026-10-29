@@ -14,7 +14,6 @@ jobs:
         run: |
           $env:Path = "C:\ProgramData\mingw64\mingw64\bin;" + $env:Path
           g++ -O2 -std=c++17 -static main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp
-          Get-Item APEXCRYPT_NUKER_NX10.exe
       - uses: actions/upload-artifact@v4
         with:
           name: APEXCRYPT-NUKER-NX10
