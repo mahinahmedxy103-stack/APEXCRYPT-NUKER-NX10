@@ -1,28 +1,21 @@
 name: Build APEXCRYPT NX10
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install MinGW
         run: choco install mingw -y --no-progress
-
       - name: Build
         shell: pwsh
         run: |
           $env:Path = "C:\ProgramData\mingw64\mingw64\bin;" + $env:Path
           g++ -O2 -std=c++17 -static main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp
           Get-Item APEXCRYPT_NUKER_NX10.exe
-
-      - name: Upload
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: APEXCRYPT-NUKER-NX10
           path: APEXCRYPT_NUKER_NX10.exe
