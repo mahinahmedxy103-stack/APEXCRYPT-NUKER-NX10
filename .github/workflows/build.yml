@@ -12,16 +12,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install MinGW
-        run: |
-          choco install mingw -y
-          refreshenv
+        run: choco install mingw -y --no-progress
 
       - name: Build
-        shell: bash
+        shell: pwsh
         run: |
-          ls -la
-          g++ -O2 -std=c++17 main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp -static || x86_64-w64-mingw32-g++ -O2 -std=c++17 main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp -static
-          ls -la
+          $env:Path = "C:\ProgramData\mingw64\mingw64\bin;" + $env:Path
+          g++ -O2 -std=c++17 -static main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp
+          Get-Item APEXCRYPT_NUKER_NX10.exe
 
       - name: Upload
         uses: actions/upload-artifact@v4
