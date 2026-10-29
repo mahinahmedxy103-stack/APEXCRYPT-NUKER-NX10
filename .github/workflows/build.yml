@@ -9,25 +9,39 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install colorama aiohttp pyinstaller
-          pip install git+https://github.com/dolfies/discord.py-self.git
+          pip install "discord.py-self @ git+https://github.com/dolfies/discord.py-self.git"
+
+      - name: List files (debug)
+        run: |
+          dir
+          python --version
+          pip list
 
       - name: Build EXE
         run: |
-          pyinstaller --onefile --console --name "APEXCRYPT_NUKER_NX10" APEXCRYPT_NUKER_NX10.py
+          pyinstaller --onefile --console --clean --name "APEXCRYPT_NUKER_NX10" APEXCRYPT_NUKER_NX10.py
+        continue-on-error: false
 
-      - name: Upload EXE artifact
+      - name: Check dist
+        run: |
+          dir dist
+
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: APEXCRYPT-NUKER-NX10
           path: dist/APEXCRYPT_NUKER_NX10.exe
+          if-no-files-found: error
