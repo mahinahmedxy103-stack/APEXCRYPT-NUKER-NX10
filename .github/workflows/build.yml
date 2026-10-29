@@ -1,20 +1,32 @@
-name: Build APEXCRYPT NX10
+name: Build APEXCRYPT NX13
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install MinGW
-        run: choco install mingw -y --no-progress
-      - name: Build
-        shell: pwsh
+
+      - name: Install vcpkg packages
         run: |
-          $env:Path = "C:\ProgramData\mingw64\mingw64\bin;" + $env:Path
-          g++ -O2 -std=c++17 -static main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp
-      - uses: actions/upload-artifact@v4
+          git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+          C:\vcpkg\bootstrap-vcpkg.bat
+          C:\vcpkg\vcpkg install curl:x64-windows-static nlohmann-json:x64-windows
+
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          set INCLUDE=%INCLUDE%;C:\vcpkg\installed\x64-windows-static\include;C:\vcpkg\installed\x64-windows\include
+          set LIB=%LIB%;C:\vcpkg\installed\x64-windows-static\lib
+          cl /EHsc /O2 /std:c++17 /D CURL_STATICLIB main.cpp /Fe:APEXCRYPT_NUKER_NX13.exe /link libcurl.lib ws2_32.lib wldap32.lib crypt32.lib normaliz.lib advapi32.lib
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
-          name: APEXCRYPT-NUKER-NX10
-          path: APEXCRYPT_NUKER_NX10.exe
+          name: APEXCRYPT-NUKER-NX13
+          path: APEXCRYPT_NUKER_NX13.exe
