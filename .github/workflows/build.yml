@@ -11,14 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSVC
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Build EXE
-        shell: cmd
+      - name: Install MinGW
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          cl /EHsc /O2 /Fe:APEXCRYPT_NUKER_NX10.exe main.cpp winhttp.lib
+          choco install mingw -y
+          refreshenv
+
+      - name: Build
+        shell: bash
+        run: |
+          ls -la
+          g++ -O2 -std=c++17 main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp -static || x86_64-w64-mingw32-g++ -O2 -std=c++17 main.cpp -o APEXCRYPT_NUKER_NX10.exe -lwinhttp -static
+          ls -la
 
       - name: Upload
         uses: actions/upload-artifact@v4
